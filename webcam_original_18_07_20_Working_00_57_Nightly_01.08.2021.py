@@ -102,8 +102,9 @@ class traffic_density:
 	    a = b = c = d = []
         
             for i in range(10):
-                with open('density.pickle', 'rb') as f:
-                    count1_global, count2_global, count3_global, count4_global = pickle.load(f)
+		f = open('density.pickle','rb')
+		count1_global, count2_global, count3_global, count4_global =  = pickle.load(f)  
+		f.close()
                 a.append(count1_global)
                 b.append(count2_global)
                 c.append(count3_global)
@@ -321,6 +322,10 @@ def Lane1():
             cycle1 = cycle1 + 1
             count1_global = cycle1
     cv2.putText(frame,'COUNT1: {0:.2f}'.format(cycle1),(30,90),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
+    f = open('density.pickle','wb')
+    pickle.dump(data,f)  
+    f.close()
+
     with open('density.pickle', 'wb') as f:
         pickle.dump([count1_global, count2_global, count3_global, count4_global], f)
         
