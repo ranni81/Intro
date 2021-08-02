@@ -16,7 +16,6 @@ import numpy as np
 import sys
 import time
 import pickle
-#import threading
 from threading import Thread
 from threading import Timer
 import importlib.util
@@ -33,25 +32,12 @@ pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.1, auto_write=Tru
 
 pixels.fill((0, 0, 0))
 
-global count1_global
-global count2_global
-global count3_global
-global count4_global
+global count1_global, count2_global, count3_global, count4_global
+count1_global, count2_global, count3_global, count4_global = 0
 
-count1_global=0
-count2_global=0
-count3_global=0
-count4_global=0
+delay1, delay2, delay3, delay4 = 3
 
-delay1 = 3
-delay2 = 3
-delay3 = 3
-delay4 = 3
-
-cycle1=0
-cycle2=0
-cycle3=0
-cycle4=0
+cycle1, cycle2, cycle3, cycle4=0
 
 #lock = threading.Lock()
 with open('density.pickle', 'wb') as f:
@@ -99,10 +85,8 @@ class VideoStream:
     def stop(self):
 	# Indicate that the camera and thread should be stopped
         self.stopped = True
-        
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 # Define traffic_density class to handle traffic weight in separate processing thread
 class traffic_density:  
     def __init__(self):
@@ -114,17 +98,8 @@ class traffic_density:
     def run(self):
         while self._running:
             
-            global count1_global
-            global count2_global
-            global count3_global
-            global count4_global
-            
-            a = []
-            b = []
-            c = []
-            d = []
-            
-#            lock.acquire()
+            global count1_global, count2_global, count3_global, count4_global
+	    a = b = c = d = []
         
             for i in range(10):
                 with open('density.pickle', 'rb') as f:
@@ -133,13 +108,8 @@ class traffic_density:
                 b.append(count2_global)
                 c.append(count3_global)
                 d.append(count4_global)
-                print("count1_global",count1_global)
-                print("count2_global",count2_global)
-                print("count3_global",count3_global)
-                print("count4_global",count4_global)
                 time.sleep(1)
-
-            
+		
             average1 = np.average(a)
             average2 = np.average(b)
             average3 = np.average(c)
@@ -155,19 +125,14 @@ class traffic_density:
             print("Average Density in Lane3:",average3)
             print("Average Density in Lane4:",average4)
             
-#            lock.release()
- 
 #Create Class
 traffic_density = traffic_density()
 #Create Thread
 traffic_density_thread = Thread(target=traffic_density.run) 
 #Start Thread 
 traffic_density_thread.start()
-#traffic_density_thread.join()
-
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 # Define traffic_signal class to handle traffic counter in separate processing thread
 class traffic_signal:  
     def __init__(self):
@@ -178,14 +143,12 @@ class traffic_signal:
 
     def run(self):
         while self._running:
-            
-#            lock.acquire()
 
             lane1_on = [10, 7, 4]
             lane2_on = [10, 7, 1]
             lane3_on = [10, 4, 1]
             lane4_on = [7, 4, 1]
-        
+
             red = [255,0,0]
             green = [0,255,0]
             pixels.fill((0, 0, 0))
@@ -220,9 +183,7 @@ class traffic_signal:
                 pixels[12] = green
             
             time.sleep(delay1) #Density delay
-            pixels.fill((0, 0, 0))            
-            
-#            lock.release()
+            pixels.fill((0, 0, 0))
 
 #Create Class
 traffic_signal = traffic_signal()
@@ -230,8 +191,6 @@ traffic_signal = traffic_signal()
 traffic_signal_thread = Thread(target=traffic_signal.run) 
 #Start Thread 
 traffic_signal_thread.start()
-#traffic_signal_thread.join()
-
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         
@@ -249,7 +208,6 @@ parser.add_argument('--resolution', help='Desired webcam resolution in WxH. If t
                     default='1280x720')
 parser.add_argument('--edgetpu', help='Use Coral Edge TPU Accelerator to speed up detection',
                     action='store_true')
-
 args = parser.parse_args()
 
 MODEL_NAME = args.modeldir
@@ -492,7 +450,6 @@ while True:
     Lane2()
     Lane3()
     Lane4()
-
 
     # Draw framerate in corner of frame
 #    cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
